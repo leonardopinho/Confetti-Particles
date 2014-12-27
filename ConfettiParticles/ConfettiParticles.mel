@@ -297,19 +297,7 @@ global proc createTarget(){
 		connectDynamic -f myTurbulence  $particleName;
 
 	}
-
 	
-	/*
-	
-	connectDynamic -f myGravity  $particleName;
-	
-	select -r $particleName;
-	connectDynamic -f turbulenceField1  $particleName;*/
-
-
-		
-		
-
 }
 
 global proc string getName(){
@@ -362,17 +350,3 @@ global proc console(string $arg){
 }
 
 confettiParticle();
-
-
-
-//polyPrimitive -ch on -o on -r 3.72407 -l 1.503035 -cuv 4 ;
-//doDelete;
-
-
-/*string $window = `window`;
-    
-showWindow $window;
-
-proc getColor(string $value){
-	print("A cor: " + $value);
-}*/
