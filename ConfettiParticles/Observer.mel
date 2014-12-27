@@ -1,0 +1,59 @@
+global string $targets[];   
+
+proc addEventListener(string $target, string $func){
+	global string $targets[];
+	$targets["test"] = "here";
+	print($targets["test"]);
+}
+
+addEventListener("teste", " // asd");
+
+/*
+var targets = {};   
+
+this.addEventListener = function(target, func){
+    if (!targets[target]) {
+        targets[target] = [];
+    }
+    targets[target].push({
+        e: target,
+        func: func
+    });
+  
+};
+
+this.removeEventListener = function ( id ) {
+    for (var m in targets) {
+        if (targets[m]) {
+            for (var i = 0, j = targets[m].length; i < j; i++) {
+                if (targets[m][i].e === id) {
+                    targets[m].splice(i, 1);
+                    return id;
+                }
+            }
+        }
+    }
+    return false;
+};
+
+
+this.dispatchEvent = function ( target, args ) {
+ 
+    if (!targets[target]) {
+        return false;
+    }
+
+    setTimeout(function () {
+        
+        var subscribers = targets[target], len = subscribers ? subscribers.length : 0;
+
+        while (len--) {
+
+            subscribers[len].func(target, args);
+        }
+        
+    }, 0);
+
+    return true;
+
+};*/
