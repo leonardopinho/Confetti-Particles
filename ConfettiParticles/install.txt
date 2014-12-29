@@ -1,0 +1,6 @@
+First save the ConfettiParticle folder in directory "C: \ Users \ <username> \ Documents \ maya \ <maya_version> \ scripts \ ConfettiParticles".
+Drag and drop the file install.mel to the Maya viewport. This creates a new button on your shelf to start the plugin.
+
+For suggestions, feedback and contact: 
+http://www.leonardopinho.com
+contato@leonardopinho.com

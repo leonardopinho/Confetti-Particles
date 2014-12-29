@@ -20,12 +20,12 @@ global proc openUI(){
 
 			if ($charSetSize < 1){
 				//print "No Character Sets. Continuing Happily...\n";
-				string $windowNoChar = `loadUI -uiFile ($scriptsDirectory+"ConfettiParticles/ui//main.ui")`;
+				string $windowNoChar = `loadUI -uiFile ($scriptsDirectory+"ConfettiParticles/ui/main.ui")`;
 				showWindow $windowNoChar;
 			}else{
 				//For character sets
 				//print "Character Sets found. Continuing Happily...\n";
-				string $windowChar = `loadUI -uiFile ($scriptsDirectory+"ConfettiParticles/ui//main.ui")`;
+				string $windowChar = `loadUI -uiFile ($scriptsDirectory+"ConfettiParticles/ui/main.ui")`;
 				showWindow $windowChar;
 				updateCharacterSets;
 			}
@@ -371,5 +371,3 @@ global proc populateTextScrollList(){
     	}
 	}
 }
-
-openUI();
