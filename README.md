@@ -1,8 +1,5 @@
 Confetti-Particles
 ==================
-
-[![banner](http://www.leonardopinho.com/imgs/banner.jpg)](http://www.leonardopinho.com/)
-
 ABOUT
 -----
 Plugin for emission of particles / confetti.
