@@ -10,7 +10,7 @@ version 1.0
 
 TODO
 -----
-- Create installer, buttons and self.
+- Add confetti plane type.
 - Implement option of automatic emitter animation.
 
 CREDITS
