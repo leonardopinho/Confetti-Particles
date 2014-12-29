@@ -13,8 +13,8 @@ TODO
 - Add confetti plane type.
 - Implement option of automatic emitter animation.
 
-
-
 CREDITS
 -----
 [Leonardo Pinho](http:/www.github.com/leonardopinho)
+
+contato@leonardopinho.com
