@@ -1,177 +1,99 @@
 global string $pluginTitle = "Confetti Particles";
-global string $version = "1.0";
-global string $win;
-global string $listInstance[];
-global int $deb = 1;
+global string $version = "1.1";
+global string $win = "MainWindow";
 
-global proc confettiParticle(){
-	
-	print("---------------------  " + getName() + "  --------------------------- \n");
-	createWindow();
-	instanceMeshs();
-	populateTextScrollList();
-}
+global proc openUI(){
 
-global proc createWindow(){
-	
 	global string $win;
 	string $name = getName();
 	int $doesExist = `window -exists $win`;
 
 	if($doesExist == 0) {
 
+		if (getApplicationVersionAsFloat() >= 2011){
+
+			string $charSets[] = `ls -type "character"`;
+		    int $charSetSize = `size $charSets`;
+			string $scriptsDirectory = `internalVar -usd`;
+
+			
+
+			if ($charSetSize < 1){
+				//print "No Character Sets. Continuing Happily...\n";
+				string $windowNoChar = `loadUI -uiFile ($scriptsDirectory+"ConfettiParticles/ui//main.ui")`;
+				showWindow $windowNoChar;
+			}else{
+				//For character sets
+				//print "Character Sets found. Continuing Happily...\n";
+				string $windowChar = `loadUI -uiFile ($scriptsDirectory+"ConfettiParticles/ui//main.ui")`;
+				showWindow $windowChar;
+				updateCharacterSets;
+			}
+		}else{
+			//You aren't using Maya 2011 if this pops up. The upgrade is worth it! :)
+			print "You're using a version of Maya that is incompatible with this script.\n";
+		}
+
+		print("---------------------  " + getName() + "  --------------------------- \n");
+
 		//change playback
 		playbackOptions -max 600 -aet 600 -ps 1 -l "continuous";
 
-		$win = `window -s false -retain -title $name`;
+		//init
+		configUI();
+		populateTextScrollList();
+		createSetup();
 
-        frameLayout -collapsable true -w 200 -h 200 -marginWidth 10 -marginHeight 10 -labelVisible false;
+	}else{
 		
-		columnLayout;
-		
-		string $imagePath = getPath("ConfettiParticles/imgs/banner.jpg");
-		console($imagePath);
-		symbolButton -image $imagePath -c"showHelp -absolute \"http:\/\/www.leonardopinho.com\";";
-       	
-       	columnLayout;
+		removeUI();
+		openUI();
 
-       	separator -height 15;
+	}
+}
 
-        rowLayout -numberOfColumns 3 -columnWidth3 50 45 40 -adjustableColumn 2
-	    -columnAlign  1 "right"
-	    -columnAttach 2 "both"  2
-	    -columnAttach 3 "both"  0;
-   		
-   		text -label "Create:";
+global proc configUI(){
+	button -edit -c createParticleEmitter create_button;
+	textScrollList -edit -numberOfRows 8 -showIndexedItem 4 -sc "selectEmitterCreated" list;
+	optionMenu -edit -changeCommand "changeParticleType" selectTypes;
+	optionMenu -edit -changeCommand "changeConfettiType" confettiType;
+	intSlider -edit -min 1 -max 100 -value 100 -step 1 -dragCommand "changeParticleSize" pSize;
+	intSlider -edit -min 1 -max 100 -value 100 -step 1 -dragCommand "changeTurbulenceFrequence" turbFreq;
+	intSlider -edit -min 1 -max 500 -value 100 -step 1 -dragCommand "changeParticleRate" particleRate;
+}
 
-       	button -label "create single" -width 163 -command createTarget;
- 		setParent ..;
+global proc changeParticleType(){
+	string $createObject = `optionMenu -q -v selectTypes`; 
+	if($createObject == "Emitter"){
 
- 		separator -height 10;
+	}else{
+		confirmDialog -title "coming soon" -message "Type not yet available. Coming soon.";
+		optionMenu -edit -sl 1 selectTypes;
+	}
+}
 
- 		text -label "Emitters created:";
+global proc changeConfettiType(){
+	string $createObject = `optionMenu -q -v confettiType`; 
+	string $ramp = "circleTransp";
+	string $rampPlace2d = "circleTranspPlace2d";
+	string $shadingRed = "red_particle";
+	
+	if($createObject == "circle"){
 
- 		separator -height 5;
-
- 		textScrollList -w 218 -h 80 -numberOfRows 6 -allowMultiSelection false
-		-showIndexedItem 4 -sc "selectEmitterCreated" "list";
-
-		separator -height 10 ;
-
-		rowLayout -numberOfColumns 3 -columnWidth3 70 85 45 -adjustableColumn 2
-	    -columnAlign  1 "right"
-	    -columnAttach 2 "both"  10
-	    -columnAttach 3 "both"  0;
-   		
-   		text -label "Confetti type:";
-
-        radioCollection ;
- 		string $radioButton1 = `radioButton -label "square" -onc "changeType \"1\""`;
- 		string $radioButton2 = `radioButton -label "circle" -onc "changeType \"2\""`;
- 		radioButton -edit -select $radioButton1;
- 		setParent ..;
-
-        showWindow $win;
+		connectAttr -force ($ramp + ".outColor") red_particle.transparency;
+		connectAttr -force ($ramp + ".outColor") yellow_particle.transparency;
+		connectAttr -force ($ramp + ".outColor") blue_particle.transparency;
 
 	}else{
 
-		deleteWindow();
-		createWindow();
+		disconnectAttr ($ramp + ".outColor") red_particle.transparency;
+		disconnectAttr ($ramp + ".outColor") yellow_particle.transparency;
+		disconnectAttr ($ramp + ".outColor") blue_particle.transparency;
 
 	}
 }
 
-
-global proc instanceMeshs(){
-		
-		global string $listInstance[];
-		
-		$polyInstances = `ls -type "polyPlane"`;
-		
-		if(size($polyInstances) < 1){
-
-			//planes particles
-			polyPlane -w 0.3 -h 0.3 -sx 1 -sy 1 -ax 0 1 0 -cuv 2 -ch 1 -n confete_1;
-			
-			//red shader
-			shadingNode -asShader phong -n red_particle;
-			sets -renderable true -noSurfaceShader true -empty -name red_particle_SG;
-			connectAttr -f "red_particle.outColor" red_particle_SG.surfaceShader;
-			setAttr "red_particle.color" -type double3 1 0 0;
-
-			select -r confete_1;
-			move -r 0 0 0 ;
-			sets -e -forceElement red_particle_SG;
-
-			polyPlane -w 0.3 -h 0.3 -sx 1 -sy 1 -ax 0 1 0 -cuv 2 -ch 1 -n confete_2;
-			
-			//yellow shader
-			shadingNode -asShader phong -n yellow_particle;
-			sets -renderable true -noSurfaceShader true -empty -name yellow_particle_SG;
-			connectAttr -f "yellow_particle.outColor" yellow_particle_SG.surfaceShader;
-			setAttr "yellow_particle.color" -type double3 1 1 0;
-
-			select -r confete_2;
-			move -r 0 .5 0 ;
-			sets -e -forceElement yellow_particle_SG;
-
-			polyPlane -w 0.3 -h 0.3 -sx 1 -sy 1 -ax 0 1 0 -cuv 2 -ch 1 -n confete_3;
-			
-			//blue shader
-			shadingNode -asShader phong -n blue_particle;
-			sets -renderable true -noSurfaceShader true -empty -name blue_particle_SG;
-			connectAttr -f "blue_particle.outColor" blue_particle_SG.surfaceShader;
-			setAttr "blue_particle.color" -type double3 0 0 1;
-
-			select -r confete_3;
-			move -r 0 1 0 ;
-			sets -e -forceElement blue_particle_SG;
-
-			select -r confete_1;
-			select -r confete_2;
-			select -r confete_3;
-
-			$listInstance = {"confete_1", "confete_2","confete_3"};
-			//print($listInstance);
-			
-
-			group -n "instances" $listInstance;
-			select -r "instances";
-
-			HideSelectedObjects;
-
-		}
-}
-
-global proc populateTextScrollList(){
-	string $groupName = (string)"confetti_single_";
-	string $groups[] = `ls -sn ($groupName + "*")`;
-
-	print($groups);
-
-	if(size($groups) > 0){
-		for($group in $groups) 
-    	{
-    		textScrollList -edit -append $group "list";
-    	}
-	}
-}
-
-global proc selectEmitterCreated(){
-	string $sel[] = `textScrollList -q -selectItem "list"`;
-	select -r $sel;
-	string $target = stringArrayToString(`ls -sl -l`, "");
-	int $size = size($target);
-	$target = `substring $target $size $size`;
-	//select particle instance
-	select -r ("particleInstancer_" + $target);
-}
-
-global proc changeType(string $type){
-	print $type;
-}
-
-global proc createTarget(){
+global proc createParticleEmitter(){
 
 	global string $listInstance[];
 
@@ -206,6 +128,7 @@ global proc createTarget(){
 		particle -n $particleName;
 		setAttr ($particleName + ".lifespanMode") 2;
 		setAttr ($particleName + ".lifespan") 9;
+		setAttr ($particleName + ".visibility") 0;
 		//connect particle to emitter
 		connectDynamic -em $emitterName $particleName;
 		// groups the emitter and the particle created in the same group
@@ -219,7 +142,7 @@ global proc createTarget(){
 		}
 
 		//particleInstancer -n $instanceName  -addObject $nList -cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail Geometry -rotationUnits Degrees -rotationOrder XYZ -position worldPosition -age age $particleName;
-		eval("particleInstancer -n " + $instanceName + " -addObject" + $nList + "-cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail Geometry -rotationUnits Degrees -rotationOrder XYZ -position worldPosition -age age -rotationType age -rotation worldVelocity -aimAxis acceleration " + $particleName );
+		eval("particleInstancer -n " + $instanceName + " -addObject" + $nList + "-cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail Geometry -rotationUnits Degrees -rotationOrder XYZ -position worldPosition -age age -rotationType age -rotation acceleration -aimAxis acceleration " + $particleName );
 		
 		parent $instanceName ($groupName + ($count+1));
 		//add value to textScrollList
@@ -233,6 +156,7 @@ global proc createTarget(){
 		particle -n $particleName;
 		setAttr ($particleName + ".lifespanMode") 2;
 		setAttr ($particleName + ".lifespan") 9;
+		setAttr ($particleName + ".visibility") 0;
 		//connect particle to emitter
 		connectDynamic -em $emitterName $particleName;
 		group -n ($groupName + ($count+1)) $emitterName;
@@ -246,7 +170,7 @@ global proc createTarget(){
 		}
 
 		//particleInstancer -n $instanceName  -addObject $nList -cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail Geometry -rotationUnits Degrees -rotationOrder XYZ -position worldPosition -age age $particleName;
-		eval("particleInstancer -n " + $instanceName + " -addObject" + $nList + "-cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail Geometry -rotationUnits Degrees -rotationOrder XYZ -position worldPosition -age age -rotationType age -rotation worldVelocity -aimAxis acceleration " + $particleName );
+		eval("particleInstancer -n " + $instanceName + " -addObject" + $nList + "-cycle None -cycleStep 1 -cycleStepUnits Frames -levelOfDetail Geometry -rotationUnits Degrees -rotationOrder XYZ -position worldPosition -age age -rotationType age -rotation acceleration -aimAxis acceleration " + $particleName );
 	
 		parent $instanceName ($groupName + ($count+1));
 
@@ -300,53 +224,152 @@ global proc createTarget(){
 	
 }
 
+
+global proc selectEmitterCreated(){
+	string $sel[] = `textScrollList -q -selectItem "list"`;
+	select -r $sel;
+	string $target = stringArrayToString(`ls -sl -l`, "");
+	int $size = size($target);
+	$target = `substring $target $size $size`;
+	//select particle instance
+	select -r ("particleInstancer_" + $target);
+}
+
+global proc changeParticleSize(){
+	string $v = `intSlider -q -v pSize`; 
+	float $nScale = (int)$v*0.01;
+
+	for($i = 0; $i < 3; $i++) {
+		if(("confete_" + ($i+1)) != ""){
+			setAttr ("confete_" + ($i+1) + ".scaleX") $nScale;
+			setAttr ("confete_" + ($i+1) + ".scaleY") $nScale;
+			setAttr ("confete_" + ($i+1) + ".scaleZ") $nScale;
+		}
+	}
+	
+}
+
+global proc changeTurbulenceFrequence(){
+	string $v = `intSlider -q -v turbFreq`; 
+	string $exist[] = `ls "myTurbulence"`; 
+
+	if($exist[0] != ""){
+		setAttr "myTurbulence.frequency" ((int)$v);
+	}	
+}
+
+global proc changeParticleRate(){
+	string $v = `intSlider -q -v particleRate`;
+	string $groupName = (string)"confetti_single_"; 
+	string $groups[] = `ls -sn ($groupName + "*")`;
+
+	if(size($groups) > 0){
+		for($i = 0; $i < (size($groups)); $i++)
+    	{
+    		setAttr ("singleEmitter_" + ($i+1) + ".rate") (int($v));
+    	}	
+	}	
+
+
+}
+
 global proc string getName(){
 	global string $pluginTitle;
 	global string $version;
 	return $pluginTitle + " - version: " + $version;
 }
 
-global proc deleteWindow(){
+global proc removeUI(){
 
 	global string $win;
 	deleteUI -window $win;
-	$win = "";
 
 }
 
-global proc string getPath(string $path)
-{
-    
-    int $result = `filetest -e $path`;
+global proc createSetup(){
+		
+		global string $listInstance[];
+		
+		$polyInstances = `ls -type "polyPlane"`;
+		
+		if(size($polyInstances) < 1){
 
-    if ($result ==1)
-    return $path;
-           
-	string $scriptPath = `getenv MAYA_SCRIPT_PATH`;
-	string $scriptPaths[];
-	tokenize ($scriptPath,";",$scriptPaths);
+			//planes particles
+			polyPlane -w 0.3 -h 0.3 -sx 1 -sy 1 -ax 0 1 0 -cuv 2 -ch 1 -n confete_1;
+			
+			//red shader
+			shadingNode -asShader lambert -n red_particle;
+			sets -renderable true -noSurfaceShader true -empty -name red_particle_SG;
+			connectAttr -f "red_particle.outColor" red_particle_SG.surfaceShader;
+			setAttr "red_particle.color" -type double3 1 0 0;
 
-	for ( $eachScriptPath in $scriptPaths)
-	{
-	   string $fullPath = $eachScriptPath+"/"+$path;
-	   int $result = `filetest -e $fullPath`;
-	  
-	   	if ($result ==1){
-	   		return $fullPath;
+			select -r confete_1;
+			move -r 0 0 0 ;
+			sets -e -forceElement red_particle_SG;
+
+			polyPlane -w 0.3 -h 0.3 -sx 1 -sy 1 -ax 0 1 0 -cuv 2 -ch 1 -n confete_2;
+			
+			//yellow shader
+			shadingNode -asShader lambert -n yellow_particle;
+			sets -renderable true -noSurfaceShader true -empty -name yellow_particle_SG;
+			connectAttr -f "yellow_particle.outColor" yellow_particle_SG.surfaceShader;
+			setAttr "yellow_particle.color" -type double3 1 1 0;
+
+			select -r confete_2;
+			move -r 0 .5 0 ;
+			sets -e -forceElement yellow_particle_SG;
+
+			polyPlane -w 0.3 -h 0.3 -sx 1 -sy 1 -ax 0 1 0 -cuv 2 -ch 1 -n confete_3;
+			
+			//blue shader
+			shadingNode -asShader lambert -n blue_particle;
+			sets -renderable true -noSurfaceShader true -empty -name blue_particle_SG;
+			connectAttr -f "blue_particle.outColor" blue_particle_SG.surfaceShader;
+			setAttr "blue_particle.color" -type double3 0 0 1;
+
+			select -r confete_3;
+			move -r 0 1 0 ;
+			sets -e -forceElement blue_particle_SG;
+
+			select -r confete_1;
+			select -r confete_2;
+			select -r confete_3;
+
+			$listInstance = {"confete_1", "confete_2","confete_3"};
+			
+			group -n "instances" $listInstance;
+			select -r "instances";
+
+			HideSelectedObjects;
+
+			//ramp to the transparent channel shader
+			string $ramp = "circleTransp";
+			string $rampPlace2d = "circleTranspPlace2d";
+			shadingNode -asTexture ramp -name $ramp;
+			shadingNode -asUtility place2dTexture -name $rampPlace2d;
+			connectAttr ($rampPlace2d + ".outUV") ($ramp + ".uv");
+			connectAttr ($rampPlace2d + ".outUvFilterSize") ($ramp + ".uvFilterSize");
+			removeMultiInstance -break true ($ramp + ".colorEntryList[1]");
+			setAttr ($ramp + ".type") 4;
+			setAttr ($ramp + ".colorEntryList[2].position") 0.48;
+			setAttr ($ramp + ".colorEntryList[0].position") 0.53;
+			setAttr ($ramp + ".interpolation") 1;
+			setAttr ($ramp + ".colorEntryList[2].color") -type double3 0 0 0 ;
+			setAttr ($ramp + ".colorEntryList[0].color") -type double3 1 1 1 ;
+
 		}
+}
+
+global proc populateTextScrollList(){
+	string $groupName = (string)"confetti_single_";
+	string $groups[] = `ls -sn ($groupName + "*")`;
+
+	if(size($groups) > 0){
+		for($group in $groups) 
+    	{
+    		textScrollList -edit -append $group "list";
+    	}
 	}
-	
-	return 0;
-
 }
 
-
-global proc console(string $arg){
-	global int $deb;
-
-	if($deb == 1)
-	print("--> " + $arg + "\n");
-
-}
-
-confettiParticle();
+openUI();
