@@ -53,6 +53,7 @@ global proc openUI(){
 }
 
 global proc configUI(){
+	button -edit -c credits marca;
 	button -edit -c createParticleEmitter create_button;
 	textScrollList -edit -numberOfRows 8 -showIndexedItem 4 -sc "selectEmitterCreated" list;
 	optionMenu -edit -changeCommand "changeParticleType" selectTypes;
@@ -370,4 +371,8 @@ global proc populateTextScrollList(){
     		textScrollList -edit -append $group "list";
     	}
 	}
+}
+
+global proc credits(){
+	showHelp -absolute "http://www.leonardopinho.com/?id=confettiParticles";
 }
