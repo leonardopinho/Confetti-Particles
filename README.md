@@ -1,5 +1,7 @@
 Confetti-Particles
 ==================
+http://www.creativecrash.com/maya/script/confetti-particles
+
 ABOUT
 -----
 Plugin for emission of particles / confetti.
@@ -12,6 +14,8 @@ TODO
 -----
 - Add confetti plane type.
 - Implement option of automatic emitter animation.
+
+https://www.youtube.com/watch?v=HsdofFs0nLI
 
 CREDITS
 -----
