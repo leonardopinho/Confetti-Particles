@@ -1,6 +1,7 @@
 Confetti-Particles
 ==================
 http://www.creativecrash.com/maya/script/confetti-particles
+https://www.youtube.com/watch?v=HsdofFs0nLI
 
 ABOUT
 -----
@@ -14,8 +15,6 @@ TODO
 -----
 - Add confetti plane type.
 - Implement option of automatic emitter animation.
-
-https://www.youtube.com/watch?v=HsdofFs0nLI
 
 CREDITS
 -----
