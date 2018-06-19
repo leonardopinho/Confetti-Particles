@@ -10,7 +10,7 @@ Plugin for emission of particles / confetti.
 Programming in Mel Script for Autodesk Maya 2014/2015.
 version 1.1
 
-[![print](http://www.leonardopinho.com.br/imgs/print.jpg)](http://www.leonardopinho.com/)
+[![print](http://leonardopinho.com.br/imgs/cpt.jpg)](http://www.leonardopinho.com/)
 
 CREDITS
 -----
